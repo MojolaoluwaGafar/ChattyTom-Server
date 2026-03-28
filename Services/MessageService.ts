@@ -91,3 +91,9 @@ export const markConversationAsRead = async (
     [convoIdStr, userId]
 );
 }
+
+// export const getUnreadCount= async (params:type) => {
+    
+
+
+// }

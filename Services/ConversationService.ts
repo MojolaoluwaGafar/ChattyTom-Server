@@ -85,15 +85,28 @@ export const getUserConversations = async(userId : number)=>{
         WHEN c.is_group = true THEN c.name
         ELSE CONCAT(u.firstname, ' ', u.lastname)
         END as display_name,
-        (SELECT content FROM messages WHERE conversation_id = c.id
-        ORDER BY created_at DESC LIMIT 1) as last_message
+        m.content as last_message,
+        m.created_at as last_message_time,
+        COUNT(m2.id) FILTER (
+        WHERE m2.created_at > cp.last_read_at
+        AND m2.sender_id != $1 ) as unread
         FROM conversations c 
-        JOIN conversation_participants cp ON cp.conversation_id = c.id
-        LEFT JOIN conversation_participants cp_other ON cp_other.conversation_id = c.id
+        JOIN conversation_participants cp 
+        ON cp.conversation_id = c.id
+        AND cp.user_id = $1
+        LEFT JOIN LATERAL
+        ( SELECT content, created_at 
+         FROM messages 
+         WHERE conversation_id = c.id
+         ORDER BY created_at DESC LIMIT 1) m ON true
+        LEFT JOIN messages m2
+        ON m2.conversation_id = c.id
+        LEFT JOIN conversation_participants cp_other
+        ON cp_other.conversation_id = c.id
         AND cp_other.user_id != $1
-        LEFT JOIN users u ON u.id = cp_other.user_id
-        WHERE cp.user_id = $1
-        GROUP BY c.id, c.is_group, c.updated_at, display_name
+        LEFT JOIN users u
+        ON u.id = cp_other.user_id
+        GROUP BY c.id, c.is_group, display_name, m.content, m.created_at, cp.last_read_at, c.updated_at
         ORDER BY c.updated_at DESC
         `, [userId]
     );

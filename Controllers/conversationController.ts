@@ -17,6 +17,7 @@ export const createOneToOne = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "otherUserId is required and must be a number" });
 
     const conversation = await createOneToOneConversation(userId, otherUserId);
+   
     res.status(201).json(conversation);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -38,6 +39,7 @@ export const createGroup = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "All member IDs must be numbers" });
 
     const groupConversation = await createGroupConversation(name, creatorId, numericMembers);
+    
     res.status(201).json(groupConversation);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -51,6 +53,7 @@ export const getMyConversations = async (req: Request, res: Response) => {
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const conversations = await getUserConversations(userId);
+    
     res.json(conversations);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -65,7 +68,8 @@ export const getASingleConversation = async (req: Request <{ id: string}>, res: 
       return res.status(400).json({ error: "Conversation id is required" });
 
     const conversation = await getConversationById(conversationId);
-    res.json(conversation);
+    
+    res.json(conversation); 
   } catch (error: any) {
     console.error("GET CONVERSATION ERROR:", error);
     res.status(500).json({ error: "Internal server error" });

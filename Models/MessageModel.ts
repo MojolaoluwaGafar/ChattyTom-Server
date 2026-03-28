@@ -5,7 +5,9 @@ export interface IMessage {
   conversation_id: string;
   sender_id: number;
   content: string;
+  readBy: number[]
   created_at: string;
+  timestamp : Date;
 }
 
 export const createMessage = async (
